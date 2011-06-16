@@ -4,9 +4,19 @@
 /*global jQuery  */
 function ICanHaz() {
     var self = this;
-    self.VERSION = "@VERSION@";
+    self.VERSION = "0.9";
     self.templates = {};
     self.partials = {};
+    
+    self.delimiters = {
+        open: '{{',
+        close: '}}'
+    };
+    
+    // public function for overriding default delimiters (i.e. open/close tags)
+    self.setDelimiters = function (delimiters) {
+        self.delimiters = delimiters;
+    };
     
     // public function for adding templates
     // We're enforcing uniqueness to avoid accidental template overwrites.
@@ -18,7 +28,7 @@ function ICanHaz() {
         self.templates[name] = templateString;
         self[name] = function (data, raw) {
             data = data || {};
-            var result = Mustache.to_html(self.templates[name], data, self.partials);
+            var result = Mustache.to_html(self.templates[name], data, self.partials, false, self.delimiters);
             return raw ? result : $(result);
         };       
     };

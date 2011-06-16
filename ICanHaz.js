@@ -1,6 +1,8 @@
 /*!
 ICanHaz.js version 0.9 -- by @HenrikJoreteg
 More info at: http://icanhazjs.com
+
+Modified by Instant Automatic (http://instantautomatic.com).
 */
 (function ($) {
 /*!
@@ -243,7 +245,8 @@ var Mustache = function() {
 
     /* includes tag */
     includes: function(needle, haystack) {
-      return haystack.indexOf(this.otag + needle) != -1;
+      var r = new RegExp(this.otag + this.escape_regex(needle));
+      return !!haystack.match(r);
     },
 
     /*
@@ -317,8 +320,11 @@ var Mustache = function() {
     /*
       Turns a template and view into HTML
     */
-    to_html: function(template, view, partials, send_fun) {
+    to_html: function(template, view, partials, send_fun, delimiters) {
       var renderer = new Renderer();
+      if(delimiters){
+        renderer.set_delimiters(delimiters.open + ' ' + delimiters.close);
+      }
       if(send_fun) {
         renderer.send = send_fun;
       }
@@ -338,6 +344,16 @@ function ICanHaz() {
     self.templates = {};
     self.partials = {};
     
+    self.delimiters = {
+        open: '{{',
+        close: '}}'
+    };
+    
+    // public function for overriding default delimiters (i.e. open/close tags)
+    self.setDelimiters = function (delimiters) {
+        self.delimiters = delimiters;
+    };
+    
     // public function for adding templates
     // We're enforcing uniqueness to avoid accidental template overwrites.
     // If you want a different template, it should have a different name.
@@ -348,7 +364,7 @@ function ICanHaz() {
         self.templates[name] = templateString;
         self[name] = function (data, raw) {
             data = data || {};
-            var result = Mustache.to_html(self.templates[name], data, self.partials);
+            var result = Mustache.to_html(self.templates[name], data, self.partials, false, self.delimiters);
             return raw ? result : $(result);
         };       
     };

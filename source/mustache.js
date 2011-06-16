@@ -238,7 +238,8 @@ var Mustache = function() {
 
     /* includes tag */
     includes: function(needle, haystack) {
-      return haystack.indexOf(this.otag + needle) != -1;
+      var r = new RegExp(this.otag + this.escape_regex(needle));
+      return !!haystack.match(r);
     },
 
     /*
@@ -312,8 +313,11 @@ var Mustache = function() {
     /*
       Turns a template and view into HTML
     */
-    to_html: function(template, view, partials, send_fun) {
+    to_html: function(template, view, partials, send_fun, delimiters) {
       var renderer = new Renderer();
+      if(delimiters){
+        renderer.set_delimiters(delimiters.open + ' ' + delimiters.close);
+      }
       if(send_fun) {
         renderer.send = send_fun;
       }
